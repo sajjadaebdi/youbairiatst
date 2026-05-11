@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from 'react';
+export const dynamic = "force-dynamic";
+
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -22,8 +24,8 @@ const contentTypes = [
 ];
 
 export default function BecomeMarketerPage() {
-  const { data: session } = useSession();
   const router = useRouter();
+  const [session, setSession] = useState(null);
   const [registering, setRegistering] = useState(false);
   const [formData, setFormData] = useState({
     bio: '',
@@ -36,6 +38,19 @@ export default function BecomeMarketerPage() {
       youtube: '',
     },
   });
+
+  useEffect(() => {
+    checkAuth();
+  }, []);
+
+  const checkAuth = async () => {
+    try {
+      const { data: { session: authSession } } = await supabase.auth.getSession();
+      setSession(authSession);
+    } catch (error) {
+      console.error("Auth check failed:", error);
+    }
+  };
 
   const handleSpecialtyToggle = (specialtyId: string) => {
     setFormData(prev => ({

@@ -1,6 +1,9 @@
-"use client"
+"use client";
 
-import { useRouter } from "next/navigation"
+export const dynamic = "force-dynamic";
+
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -8,32 +11,20 @@ import { Plus, Store, Package } from "lucide-react"
 
 export default function SellPage() {
   const router = useRouter()
-  const { data: session, status } = useSession()
+  const [session, setSession] = useState(null);
 
-  // Temporarily disabled authentication check
-  // useEffect(() => {
-  //   if (status === "unauthenticated") {
-  //     router.push("/signin?callbackUrl=/sell")
-  //   }
-  // }, [status, router])
+  useEffect(() => {
+    checkAuth();
+  }, []);
 
-  // Temporarily disabled loading check
-  // if (status === "loading") {
-  //   return (
-  //     <div className="py-12 text-center">
-  //       <p className="text-muted-foreground">Loading...</p>
-  //     </div>
-  //   )
-  // }
-
-  // Temporarily disabled authentication check
-  // if (status === "unauthenticated") {
-  //   return (
-  //     <div className="py-12 text-center">
-  //       <p className="text-muted-foreground">Please sign in to access this page.</p>
-  //     </div>
-  //   )
-  // }
+  const checkAuth = async () => {
+    try {
+      const { data: { session: authSession } } = await supabase.auth.getSession();
+      setSession(authSession);
+    } catch (error) {
+      console.error("Auth check failed:", error);
+    }
+  };
 
   return (
     <div className="py-12">

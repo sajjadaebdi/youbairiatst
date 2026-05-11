@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Upload } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase/client";
@@ -17,7 +17,7 @@ import { Separator } from "@/components/ui/separator"
 
 export default function AddProductPage() {
   const router = useRouter()
-  const { data: session, status } = useSession()
+  const [session, setSession] = useState(null);
   const [isLoading, setIsLoading] = useState(false)
   const [files, setFiles] = useState<File[]>([])
   const [thumbnail, setThumbnail] = useState<File | null>(null)
@@ -28,14 +28,26 @@ export default function AddProductPage() {
     price: "",
   })
 
-  // Redirect to login if not authenticated
-  if (status === "loading") {
-    return <div className="flex items-center justify-center min-h-screen">Loading...</div>
-  }
+  useEffect(() => {
+    checkAuth();
+  }, []);
 
-  if (status === "unauthenticated") {
-    router.push("/login")
-    return null
+  const checkAuth = async () => {
+    try {
+      const { data: { session: authSession } } = await supabase.auth.getSession();
+      if (!authSession) {
+        router.push("/login");
+        return;
+      }
+      setSession(authSession);
+    } catch (error) {
+      console.error("Auth check failed:", error);
+      router.push("/login");
+    }
+  };
+
+  if (!session) {
+    return <div className="flex items-center justify-center min-h-screen">Loading...</div>
   }
 
   const handleInputChange = (field: string, value: string) => {

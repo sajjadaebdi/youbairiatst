@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
@@ -42,7 +44,8 @@ interface Payout {
 }
 
 export default function AdminPayoutsPage() {
-  const { data: session } = useSession();
+  const router = useRouter();
+  const [session, setSession] = useState(null);
   const [payouts, setPayouts] = useState<Payout[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('all');
@@ -50,7 +53,28 @@ export default function AdminPayoutsPage() {
   const [showQRModal, setShowQRModal] = useState(false);
 
   useEffect(() => {
-    fetchPayouts();
+    checkAuth();
+  }, []);
+
+  const checkAuth = async () => {
+    try {
+      const { data: { session: authSession } } = await supabase.auth.getSession();
+      if (!authSession?.user) {
+        router.push("/login");
+        return;
+      }
+      setSession(authSession);
+      fetchPayouts();
+    } catch (error) {
+      console.error("Auth check failed:", error);
+      router.push("/login");
+    }
+  };
+
+  useEffect(() => {
+    if (session) {
+      fetchPayouts();
+    }
   }, [statusFilter]);
 
   const fetchPayouts = async () => {

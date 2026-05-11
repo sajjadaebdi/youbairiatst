@@ -313,6 +313,6 @@ export default function ProductPage({ params }: ProductPageProps) {
         </Tabs>
       </div>
     </div>
-  </AuthGuard>
+    </AuthGuard>
   )
 }
