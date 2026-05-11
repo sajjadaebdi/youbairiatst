@@ -1,7 +1,8 @@
 "use client"
 
-import { SessionProvider as NextAuthSessionProvider } from "next-auth/react"
+// Supabase auth doesn't require a session provider wrapper
+// This component is kept for backwards compatibility
 
 export function SessionProvider({ children }: { children: React.ReactNode }) {
-  return <NextAuthSessionProvider>{children}</NextAuthSessionProvider>
+  return <>{children}</>
 } 

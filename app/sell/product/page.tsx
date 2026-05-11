@@ -5,7 +5,7 @@ import type React from "react"
 import { useState } from "react"
 import { Upload } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { useSession } from "next-auth/react"
+import { supabase } from "@/lib/supabase/client";
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"

@@ -1,4 +1,4 @@
-import { withAuth } from "next-auth/middleware"
+// NextAuth middleware removed - using Supabase auth instead
 import { NextResponse } from "next/server"
 
 // Temporarily disabled authentication for testing

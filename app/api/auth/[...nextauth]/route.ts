@@ -1,6 +1,16 @@
-import NextAuth from "next-auth"
-import { authOptions } from "@/lib/auth"
+import { NextResponse } from 'next/server'
 
-const handler = NextAuth(authOptions)
+// NextAuth route removed - using Supabase auth instead
+export async function GET(request: Request) {
+  return NextResponse.json(
+    { error: 'This endpoint is no longer used. Use Supabase authentication instead.' },
+    { status: 410 }
+  )
+}
 
-export { handler as GET, handler as POST }
+export async function POST(request: Request) {
+  return NextResponse.json(
+    { error: 'This endpoint is no longer used. Use Supabase authentication instead.' },
+    { status: 410 }
+  )
+}
