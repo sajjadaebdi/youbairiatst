@@ -305,7 +305,8 @@ export default function CategoryPage({ params }: CategoryPageProps) {
   }
 
   return (
-    <div className="container py-8 md:py-12">
+    <AuthGuard redirectTo="/">
+      <div className="container py-8 md:py-12">
       <Link href="/products" className="inline-flex items-center gap-1 text-sm font-medium mb-6 hover:underline">
         <ArrowLeft className="h-4 w-4" />
         Back to All Categories
@@ -330,6 +331,7 @@ export default function CategoryPage({ params }: CategoryPageProps) {
             />
           ))}
         </div>
+      </div>
       </div>
     </AuthGuard>
   )
