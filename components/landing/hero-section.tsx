@@ -26,10 +26,10 @@ export function HeroSection() {
           <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-[#6F263D]/8 via-transparent pointer-events-none" />
           <motion.div variants={item} className="mx-auto max-w-3xl text-center">
             <p className="mb-4 inline-flex rounded-full border border-[#6F263D]/12 bg-[#6F263D]/5 px-4 py-1.5 text-sm font-semibold uppercase tracking-[0.3em] text-[#6F263D] backdrop-blur">
-              Premium creator platform
+               WANNA TO DO SOMETHING BIG?
             </p>
             <h1 className="mt-6 text-4xl font-semibold tracking-tight text-slate-900 sm:text-5xl md:text-6xl">
-              Build a business for the internet with elegant tools and effortless growth.
+              Where From Internet Business Starts. Build Your Digital Store in Minutes. 
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-base leading-8 text-slate-600 sm:text-lg md:text-xl">
               Youbairia makes it simple to launch your storefront, manage campaigns, and grow a digital business that feels polished from day one.
