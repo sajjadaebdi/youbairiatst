@@ -1,63 +1,60 @@
 "use client"
 
 import Link from "next/link"
-import Image from "next/image"
+import { useRouter } from "next/navigation"
 import { useState } from "react"
-import { ArrowLeft, Minus, Plus, Trash2 } from "lucide-react"
+import { Minus, Plus, Trash2 } from "lucide-react"
+import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
-import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
-
 import { useCartStore } from "@/app/store/cart"
-import { AuthGuard } from "@/components/auth-guard"
+import { supabase } from "@/lib/supabase/client"
 
 export default function CartPage() {
-  return (
-    <AuthGuard>
-      <CartContent />
-    </AuthGuard>
-  )
-}
-
-function CartContent() {
-  const {
-    items,
-    updateQuantity,
-    removeItem,
-  } = useCartStore()
+  const router = useRouter()
+  const { items, updateQuantity, removeItem } = useCartStore()
   const [updatingItems, setUpdatingItems] = useState<Set<string>>(new Set())
+  const [isCheckingOut, setIsCheckingOut] = useState(false)
 
-  const handleUpdateQuantity = async (id: string, newQuantity: number) => {
+  const handleUpdateQuantity = (id: string, newQuantity: number) => {
     if (newQuantity < 1) return
 
-    setUpdatingItems(prev => new Set(prev).add(id))
-    try {
-      await updateQuantity(id, newQuantity)
-    } catch (error) {
-      console.error("Failed to update quantity:", error)
-    } finally {
-      setUpdatingItems(prev => {
-        const newSet = new Set(prev)
-        newSet.delete(id)
-        return newSet
-      })
-    }
+    setUpdatingItems((prev) => new Set(prev).add(id))
+    updateQuantity(id, newQuantity)
+    setUpdatingItems((prev) => {
+      const next = new Set(prev)
+      next.delete(id)
+      return next
+    })
   }
 
-  const handleRemoveItem = async (id: string) => {
-    setUpdatingItems(prev => new Set(prev).add(id))
+  const handleRemoveItem = (id: string) => {
+    setUpdatingItems((prev) => new Set(prev).add(id))
+    removeItem(id)
+    setUpdatingItems((prev) => {
+      const next = new Set(prev)
+      next.delete(id)
+      return next
+    })
+  }
+
+  const handleCheckout = async () => {
+    setIsCheckingOut(true)
     try {
-      await removeItem(id)
-    } catch (error) {
-      console.error("Failed to remove item:", error)
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+
+      if (!session?.user) {
+        toast.info("Please log in to complete your purchase")
+        router.push(`/login?callbackUrl=${encodeURIComponent("/checkout")}`)
+        return
+      }
+
+      router.push("/checkout")
     } finally {
-      setUpdatingItems(prev => {
-        const newSet = new Set(prev)
-        newSet.delete(id)
-        return newSet
-      })
+      setIsCheckingOut(false)
     }
   }
 
@@ -65,20 +62,19 @@ function CartContent() {
     (total, item) => total + item.price * item.quantity,
     0
   )
-  const tax = subtotal * 0.1 // 10% tax
+  const tax = subtotal * 0.1
   const total = subtotal + tax
-  const totalItems = items.reduce((acc, item) => acc + item.quantity, 0)
 
   return (
     <div className="min-h-screen bg-background">
       <div className="container max-w-4xl mx-auto px-4 py-8">
         <h1 className="text-2xl font-bold mb-8 text-center">Shopping Cart</h1>
-        
+
         {items.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-muted-foreground mb-4">Your cart is empty</p>
             <Button asChild>
-              <a href="/">Continue Shopping</a>
+              <Link href="/products">Continue Shopping</Link>
             </Button>
           </div>
         ) : (
@@ -99,7 +95,9 @@ function CartContent() {
                     <Button
                       variant="outline"
                       size="icon"
-                      onClick={() => handleUpdateQuantity(item.id, Math.max(0, item.quantity - 1))}
+                      onClick={() =>
+                        handleUpdateQuantity(item.id, item.quantity - 1)
+                      }
                       disabled={updatingItems.has(item.id)}
                     >
                       <Minus className="h-4 w-4" />
@@ -108,7 +106,9 @@ function CartContent() {
                     <Button
                       variant="outline"
                       size="icon"
-                      onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
+                      onClick={() =>
+                        handleUpdateQuantity(item.id, item.quantity + 1)
+                      }
                       disabled={updatingItems.has(item.id)}
                     >
                       <Plus className="h-4 w-4" />
@@ -125,26 +125,24 @@ function CartContent() {
                 </div>
               </Card>
             ))}
-            
+
             <Card className="p-4">
               <div className="flex justify-between items-center mb-4">
                 <span className="font-medium">Total</span>
                 <span className="font-bold">₹{total.toFixed(2)}</span>
               </div>
-              <Link href="/checkout">
-                <Button className="w-full" size="lg">
-                  Proceed to Checkout
-                </Button>
-              </Link>
+              <Button
+                className="w-full"
+                size="lg"
+                disabled={isCheckingOut}
+                onClick={handleCheckout}
+              >
+                {isCheckingOut ? "Checking..." : "Proceed to Checkout"}
+              </Button>
             </Card>
           </div>
         )}
       </div>
     </div>
-
-
-
   )
-
-
 }

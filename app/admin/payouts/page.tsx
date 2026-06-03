@@ -2,9 +2,8 @@
 
 export const dynamic = "force-dynamic";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase/client';
+import { useState, useEffect, useCallback } from 'react';
+import { useAdmin } from '@/hooks/use-admin';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -16,6 +15,7 @@ import { toast } from 'sonner';
 
 interface Payout {
   id: string;
+  submissionId: string;
   amount: number;
   status: string;
   createdAt: string;
@@ -44,52 +44,31 @@ interface Payout {
 }
 
 export default function AdminPayoutsPage() {
-  const router = useRouter();
-  const [session, setSession] = useState(null);
+  const { isReady, isAdmin, getAuthHeaders } = useAdmin();
   const [payouts, setPayouts] = useState<Payout[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedPayout, setSelectedPayout] = useState<Payout | null>(null);
   const [showQRModal, setShowQRModal] = useState(false);
 
-  useEffect(() => {
-    checkAuth();
-  }, []);
-
-  const checkAuth = async () => {
-    try {
-      const { data: { session: authSession } } = await supabase.auth.getSession();
-      if (!authSession?.user) {
-        router.push("/login");
-        return;
-      }
-      setSession(authSession);
-      fetchPayouts();
-    } catch (error) {
-      console.error("Auth check failed:", error);
-      router.push("/login");
-    }
-  };
-
-  useEffect(() => {
-    if (session) {
-      fetchPayouts();
-    }
-  }, [statusFilter]);
-
-  const fetchPayouts = async () => {
+  const fetchPayouts = useCallback(async () => {
+    setLoading(true);
     try {
       const params = new URLSearchParams();
       if (statusFilter !== 'all') {
         params.append('status', statusFilter);
       }
-      
-      const response = await fetch(`/api/payouts?${params}`);
+
+      const headers = await getAuthHeaders();
+      const response = await fetch(`/api/admin/payouts?${params}`, { headers });
+
       if (response.ok) {
         const data = await response.json();
-        setPayouts(data.payouts);
+        setPayouts(data.payouts ?? []);
       } else {
-        toast.error('Failed to fetch payouts');
+        const body = await response.json().catch(() => ({}));
+        toast.error(body.error ?? 'Failed to fetch payouts');
+        setPayouts([]);
       }
     } catch (error) {
       console.error('Error fetching payouts:', error);
@@ -97,21 +76,26 @@ export default function AdminPayoutsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [statusFilter, getAuthHeaders]);
+
+  useEffect(() => {
+    if (isReady && isAdmin) {
+      fetchPayouts();
+    }
+  }, [isReady, isAdmin, fetchPayouts]);
 
   const processPayout = async (submissionId: string) => {
     try {
-      const response = await fetch('/api/payouts', {
+      const headers = await getAuthHeaders();
+      const response = await fetch('/api/admin/payouts', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify({ submissionId }),
       });
 
       if (response.ok) {
         toast.success('Payout processed successfully!');
-        fetchPayouts(); // Refresh the list
+        fetchPayouts();
       } else {
         const error = await response.json();
         toast.error(error.error || 'Failed to process payout');
@@ -145,13 +129,17 @@ export default function AdminPayoutsPage() {
     }
   };
 
-  if (!session?.user) {
+  if (!isReady) {
+    return <p className="text-muted-foreground">Loading admin...</p>;
+  }
+
+  if (!isAdmin) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">Access Denied</h1>
-          <p className="text-gray-600">Please sign in to access the admin panel.</p>
-        </div>
+      <div className="rounded-lg border border-destructive/50 bg-destructive/5 p-6">
+        <h2 className="font-semibold text-destructive">Admin access denied</h2>
+        <p className="text-sm text-muted-foreground mt-2">
+          Add your email to ADMIN_EMAILS and NEXT_PUBLIC_ADMIN_EMAILS in .env.local.
+        </p>
       </div>
     );
   }
@@ -271,7 +259,7 @@ export default function AdminPayoutsPage() {
                   {payout.status === 'PENDING' && (
                     <>
                       <Button 
-                        onClick={() => processPayout(payout.id)}
+                        onClick={() => processPayout(payout.submissionId)}
                         className="flex items-center gap-2"
                       >
                         <DollarSign className="h-4 w-4" />
@@ -299,7 +287,7 @@ export default function AdminPayoutsPage() {
                               description={`Payout for: ${selectedPayout.submission.task.title}`}
                               onPaymentComplete={() => {
                                 setShowQRModal(false);
-                                processPayout(selectedPayout.id);
+                                processPayout(selectedPayout.submissionId);
                               }}
                             />
                           )}

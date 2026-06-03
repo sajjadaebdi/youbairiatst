@@ -149,7 +149,7 @@ CREATE TABLE payouts (
 3. Submit content for approved tasks
 4. Track earnings and completed tasks
 
-### For Admins
+### For Adminsm
 1. Login with admin credentials
 2. Process payouts at `/admin/payouts`
 3. Manage payment settings at `/admin/payment-settings`
@@ -166,9 +166,22 @@ DATABASE_URL="mysql://user:password@localhost:3306/database"
 NEXTAUTH_SECRET="your-secret-key"
 NEXTAUTH_URL="http://localhost:3001"
 
+# Supabase
+SUPABASE_URL="https://your-project.supabase.co"
+SUPABASE_ANON_KEY="your-public-anon-key"
+SUPABASE_SERVICE_ROLE_KEY="your-service-role-key"
+
+# OpenRouter / Image Generation
+OPENROUTER_API_KEY="your-openrouter-api-key"
+OPENROUTER_CHAT_MODEL="openai/gpt-4o-mini"
+OPENROUTER_IMAGE_MODEL="gpt-image-1"
+IMAGE_PROVIDER="openrouter"
+
 # Paytm UPI (Optional - can be set via admin interface)
 PAYTM_UPI_ID="9368598307@paytm"
 ```
+
+Create a Supabase storage bucket named `product-images` for generated product thumbnails.
 
 ### Payment Configuration
 ```typescript

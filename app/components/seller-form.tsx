@@ -160,7 +160,7 @@ export default function SellerForm() {
         description: "Your shop has been created successfully.",
       })
 
-      router.push("/products")
+      router.push("/product-manager")
     } catch (error) {
       console.error("CREATE SHOP ERROR:", error)
 
@@ -181,15 +181,7 @@ export default function SellerForm() {
     <div className="max-w-7xl mx-auto px-4">
       <div className="container py-8 md:py-12">
         <div className="mx-auto max-w-3xl space-y-8">
-          <div>
-            <h1 className="text-5xl md:text-6xl font-bold mb-6 pb-2 bg-clip-text text-transparent bg-gradient-to-r from-primary via-primary/80 to-primary/60 leading-[1.15]">
-              Create Your Digital Shop
-            </h1>
-
-            <p className="text-muted-foreground mt-2">
-              Set up your seller profile to start selling digital products.
-            </p>
-          </div>
+          
 
           <Separator />
 

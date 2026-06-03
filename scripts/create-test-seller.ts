@@ -45,8 +45,11 @@ async function createTestSeller() {
       data: {
         title: 'Test Digital Product',
         description: 'This is a test digital product for demonstration purposes',
+        shortDescription: 'A demo digital product to showcase marketplace flow.',
+        longDescription: 'This sample product demonstrates how generated product descriptions and images will appear in the Youbairia marketplace.',
         price: 29.99,
         category: 'templates',
+        tags: ['demo', 'template', 'test'],
         image: '/placeholder.jpg',
         sellerId: seller.id,
         status: 'PENDING'

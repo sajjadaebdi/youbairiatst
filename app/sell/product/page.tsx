@@ -92,9 +92,19 @@ export default function AddProductPage() {
       
       // First, get the seller profile for the current user
       const sellerResponse = await fetch(`/api/seller?userId=${session.user.id}`)
-      
+      const sellerContentType = sellerResponse.headers.get("content-type") || ""
+      if (!sellerContentType.includes("application/json")) {
+        const text = await sellerResponse.text()
+        throw new Error(
+          `Seller API returned unexpected response: ${sellerResponse.status} ${sellerResponse.statusText} - ${text.slice(0, 200)}`
+        )
+      }
+
       if (!sellerResponse.ok) {
-        throw new Error("Seller profile not found. Please create a shop first.")
+        const errorBody = await sellerResponse.json().catch(() => ({}))
+        throw new Error(
+          errorBody.error ?? "Seller profile not found. Please create a shop first."
+        )
       }
 
       const seller = await sellerResponse.json()
@@ -120,12 +130,21 @@ export default function AddProductPage() {
         body: productFormData,
       })
 
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.error || "Failed to create product")
+      const contentType = response.headers.get("content-type") || ""
+      if (!contentType.includes("application/json")) {
+        const text = await response.text()
+        throw new Error(
+          `Expected JSON but got ${response.status} ${response.statusText}: ${text.slice(0, 200)}`
+        )
       }
 
-      const product = await response.json()
+      const responseBody = await response.json()
+
+      if (!response.ok) {
+        throw new Error(responseBody.error || "Failed to create product")
+      }
+
+      const product = responseBody
       toast.success("Product created successfully!")
       router.push(`/shop/${seller.shopUrl}`)
     } catch (error) {

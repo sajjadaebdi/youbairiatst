@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useRouter } from "next/navigation"
-import { User, Settings, LogOut, ShoppingBag } from "lucide-react"
+import { User, Settings, LogOut, ShoppingBag, Package } from "lucide-react"
 import { toast } from "sonner"
 
 type SessionUser = {
@@ -117,6 +117,10 @@ export function UserMenu() {
         <DropdownMenuItem onClick={() => router.push("/orders")}>
           <ShoppingBag className="mr-2 h-4 w-4" />
           <span>Orders</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => router.push("/product-manager")}>
+          <Package className="mr-2 h-4 w-4" />
+          <span>Product Manager</span>
         </DropdownMenuItem>
         
         <DropdownMenuItem onClick={() => router.push("/settings")}>

@@ -19,7 +19,7 @@ export default function LandingPage() {
       try {
         const { data: { session } } = await supabase.auth.getSession()
         if (session?.user) {
-          router.replace("/products")
+          router.replace("/sell/promptstore")
           return
         }
       } catch (error) {

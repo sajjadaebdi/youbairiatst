@@ -1,10 +1,9 @@
 "use client"
 
 import Link from "next/link"
-import { ArrowRight } from "lucide-react"
+import { ArrowRight, Store } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 
-import { AuthGuard } from "@/components/auth-guard"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import ProductCard from "@/app/components/product-card"
@@ -21,6 +20,9 @@ type Campaign = {
   payout?: number
   budget?: number
   seller_id?: string
+  contact_email?: string
+  website?: string
+  social_links?: string[] | null
 }
 
 const placeholderImage = "/placeholder.svg?height=300&width=300"
@@ -82,12 +84,17 @@ export default function ProductsPage() {
   const activeCategory = categories.find((category) => category.id === activeTab) ?? categories[0]
 
   return (
-    <AuthGuard redirectTo="/">
       <div className="container py-8 md:py-12">
         <div className="flex flex-col gap-8">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Browse Campaigns</h1>
-          <p className="text-muted-foreground mt-2">Discover active campaigns from sellers across the marketplace.</p>
+          <h1 className="text-3xl font-bold tracking-tight">Browse Digital Products and Campaigns</h1>
+          <p className="text-muted-foreground mt-2">Discover active products and campaigns from sellers across the marketplace.</p>
+          <Button asChild className="mt-4">
+            <Link href="/create-shop">
+              <Store className="mr-2 h-4 w-4" />
+              Create Shop
+            </Link>
+          </Button>
         </div>
 
         <div className="md:hidden">
@@ -131,7 +138,7 @@ export default function ProductsPage() {
                         price={Number(campaign.payout ?? campaign.budget ?? 0)}
                         image={campaign.thumbnail || placeholderImage}
                         category={campaign.platform || campaign.category || "General"}
-                        seller={campaign.seller_id || "Seller"}
+                        seller={campaign.title}
                       />
                     ))}
                   </div>
@@ -159,7 +166,7 @@ export default function ProductsPage() {
                         price={Number(campaign.payout ?? campaign.budget ?? 0)}
                         image={campaign.thumbnail || placeholderImage}
                         category={campaign.platform || campaign.category || "General"}
-                        seller={campaign.seller_id || "Seller"}
+                        seller={campaign.title}
                       />
                     ))}
                   </div>
@@ -170,6 +177,5 @@ export default function ProductsPage() {
         )}
       </div>
     </div>
-    </AuthGuard>
   )
 }

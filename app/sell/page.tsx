@@ -36,7 +36,30 @@ export default function SellPage() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid md:grid-cols-3 gap-6">
+          <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => router.push("/product-manager")}>
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-purple-100 dark:bg-purple-900/20 rounded-lg">
+                  <Package className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+                </div>
+                <div>
+                  <CardTitle>Product Manager</CardTitle>
+                  <CardDescription>
+                    Create, edit, and delete your product listings
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <ul className="text-sm text-muted-foreground space-y-2">
+                <li>• Full CRUD on your products</li>
+                <li>• Manage price, images, and status</li>
+                <li>• View live marketplace listings</li>
+              </ul>
+            </CardContent>
+          </Card>
+
           <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => router.push("/create-shop")}>
             <CardHeader>
               <div className="flex items-center gap-3">

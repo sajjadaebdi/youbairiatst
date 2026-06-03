@@ -1,70 +1,117 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
+function normalizeTags(value: unknown): string[] {
+  if (Array.isArray(value)) {
+    return value.map((tag) => String(tag).trim()).filter(Boolean)
+  }
+
+  if (typeof value === 'string') {
+    return value
+      .split(/[,\n]/)
+      .map((tag) => tag.trim())
+      .filter(Boolean)
+  }
+
+  return []
+}
+
+async function findSeller(sellerId: string) {
+  return await prisma.seller.findFirst({
+    where: {
+      OR: [{ id: sellerId }, { userId: sellerId }],
+    },
+  })
+}
+
 export async function POST(req: NextRequest) {
   try {
-    const formData = await req.formData()
-    
-    const title = formData.get('title') as string
-    const description = formData.get('description') as string
-    const category = formData.get('category') as string
-    const price = parseFloat(formData.get('price') as string)
-    const sellerId = formData.get('sellerId') as string
-    const thumbnail = formData.get('thumbnail') as File | null
-    const files = formData.getAll('files') as File[]
+    const contentType = req.headers.get('content-type') || ''
 
-    // Validate required fields
-    if (!title || !description || !category || !price || !sellerId) {
-      return NextResponse.json(
-        { error: 'Missing required fields' },
-        { status: 400 }
-      )
+    if (contentType.includes('multipart/form-data')) {
+      const formData = await req.formData()
+      const title = String(formData.get('title') ?? '').trim()
+      const description = String(formData.get('description') ?? '').trim()
+      const category = String(formData.get('category') ?? '').trim()
+      const price = Number(formData.get('price')) || 0
+      const sellerId = String(formData.get('sellerId') ?? '').trim()
+      const thumbnail = formData.get('thumbnail') as File | null
+      const files = formData.getAll('files') as File[]
+
+      if (!title || !description || !category || !sellerId) {
+        return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+      }
+
+      if (files.length === 0) {
+        return NextResponse.json({ error: 'At least one product file is required' }, { status: 400 })
+      }
+
+      const seller = await findSeller(sellerId)
+      if (!seller) {
+        return NextResponse.json({ error: 'Seller not found' }, { status: 404 })
+      }
+
+      const imageUrl = thumbnail ? '/placeholder.jpg' : '/placeholder.jpg'
+
+      const product = await prisma.product.create({
+        data: {
+          title,
+          description,
+          shortDescription: description,
+          longDescription: description,
+          category,
+          price,
+          image: imageUrl,
+          tags: [],
+          sellerId: seller.id,
+          status: 'PENDING',
+        },
+      })
+
+      return NextResponse.json(product)
     }
 
-    if (files.length === 0) {
-      return NextResponse.json(
-        { error: 'At least one product file is required' },
-        { status: 400 }
-      )
+    const body = await req.json()
+    const title = String(body.title ?? '').trim()
+    const shortDescription = String(body.shortDescription ?? '').trim()
+    const longDescription = String(body.longDescription ?? '').trim()
+    const category = String(body.category ?? '').trim()
+    const tags = normalizeTags(body.tags)
+    const sellerId = String(body.sellerId ?? '').trim()
+    const price = Number(body.price) || 0
+    const status = String(body.status ?? 'PENDING').trim().toUpperCase()
+
+    if (!title || !shortDescription || !longDescription || !category || !sellerId) {
+      return NextResponse.json({ error: 'Missing required product draft fields' }, { status: 400 })
     }
 
-    // Validate seller exists
-    const seller = await prisma.seller.findUnique({
-      where: { id: sellerId }
-    })
-
+    const seller = await findSeller(sellerId)
     if (!seller) {
-      return NextResponse.json(
-        { error: 'Seller not found' },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: 'Seller not found' }, { status: 404 })
     }
 
-    // TODO: Handle file upload to cloud storage (AWS S3, Cloudinary, etc.)
-    // For now, we'll store placeholder values
-    const imageUrl = thumbnail ? '/placeholder.jpg' : '/placeholder.jpg'
-    const fileUrls = files.map(() => '/placeholder-file.zip')
-
-    // Create product
     const product = await prisma.product.create({
       data: {
         title,
-        description,
+        description: longDescription,
+        shortDescription,
+        longDescription,
         category,
         price,
-        image: imageUrl,
-        sellerId,
-        status: 'PENDING', // Products need admin approval
-        createdAt: new Date(),
-        updatedAt: new Date()
-      }
+        tags,
+        image: '/placeholder.jpg',
+        sellerId: seller.id,
+        status: status || 'PENDING',
+      },
     })
 
     return NextResponse.json(product)
   } catch (error) {
     console.error('Error creating product:', error)
     return NextResponse.json(
-      { error: 'Error creating product' },
+      {
+        error: error instanceof Error ? error.message : 'Error creating product',
+      },
       { status: 500 }
     )
   }
@@ -84,13 +131,17 @@ export async function GET(req: NextRequest) {
     }
 
     if (sellerId) {
-      where.sellerId = sellerId
+      const seller = await findSeller(sellerId)
+      if (seller) {
+        where.sellerId = seller.id
+      } else {
+        return NextResponse.json({ error: 'Seller not found' }, { status: 404 })
+      }
     }
 
     if (status) {
-      where.status = status
-    } else {
-      // Default to only approved products for public access
+      where.status = status.toUpperCase()
+    } else if (!sellerId) {
       where.status = 'APPROVED'
     }
 
@@ -100,13 +151,13 @@ export async function GET(req: NextRequest) {
         seller: {
           select: {
             shopName: true,
-            shopUrl: true
-          }
-        }
+            shopUrl: true,
+          },
+        },
       },
       orderBy: {
-        createdAt: 'desc'
-      }
+        createdAt: 'desc',
+      },
     })
 
     return NextResponse.json(products)
@@ -117,4 +168,5 @@ export async function GET(req: NextRequest) {
       { status: 500 }
     )
   }
-} 
+}
+ 

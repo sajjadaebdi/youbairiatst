@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Download, Smartphone, QrCode } from "lucide-react"
-import { getPaytmUpiId } from "@/lib/payment-config"
+import { getMerchantName, getPaytmUpiId } from "@/lib/payment-config"
 import { toast } from "sonner"
 
 interface UPIQRCodeProps {
@@ -35,7 +35,7 @@ export function UPIQRCode({ amount, description = "Payment for Digital Products"
       setPaymentId(uniquePaymentId)
 
       // Create UPI payment URL
-      const upiUrl = `upi://pay?pa=${merchantUpiId}&pn=Digital Marketplace&am=${amount}&cu=INR&tn=${description}&tr=${uniquePaymentId}`
+      const upiUrl = `upi://pay?pa=${merchantUpiId}&pn=${encodeURIComponent(getMerchantName())}&am=${amount}&cu=INR&tn=${encodeURIComponent(description)}&tr=${uniquePaymentId}`
 
       // Generate QR code
       const qrDataUrl = await QRCode.toDataURL(upiUrl, {

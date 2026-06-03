@@ -3,7 +3,6 @@
 import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
 
-import { AuthGuard } from "@/components/auth-guard"
 import ProductCard from "@/app/components/product-card"
 import { Button } from "@/components/ui/button"
 
@@ -305,7 +304,6 @@ export default function CategoryPage({ params }: CategoryPageProps) {
   }
 
   return (
-    <AuthGuard redirectTo="/">
       <div className="container py-8 md:py-12">
       <Link href="/products" className="inline-flex items-center gap-1 text-sm font-medium mb-6 hover:underline">
         <ArrowLeft className="h-4 w-4" />
@@ -333,6 +331,5 @@ export default function CategoryPage({ params }: CategoryPageProps) {
         </div>
       </div>
       </div>
-    </AuthGuard>
   )
 }

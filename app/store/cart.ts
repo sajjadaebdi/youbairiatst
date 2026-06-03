@@ -1,6 +1,5 @@
 import { create } from "zustand"
 import { persist } from "zustand/middleware"
-import { supabase } from "@/lib/supabase/client"
 
 export interface CartItem {
   id: string
@@ -14,68 +13,58 @@ export interface CartItem {
 
 interface CartStore {
   items: CartItem[]
-  addItem: (item: CartItem) => Promise<void>
-  removeItem: (id: string) => Promise<void>
-  updateQuantity: (id: string, quantity: number) => Promise<void>
-  clearCart: () => Promise<void>
-  isAuthenticated: boolean
-  checkAuth: () => Promise<void>
+  addItem: (item: Omit<CartItem, "quantity"> & { quantity?: number }) => void
+  removeItem: (id: string) => void
+  updateQuantity: (id: string, quantity: number) => void
+  clearCart: () => void
 }
 
 export const useCartStore = create<CartStore>()(
   persist(
     (set, get) => ({
       items: [],
-      isAuthenticated: false,
 
-      checkAuth: async () => {
-        try {
-          const { data: { session } } = await supabase.auth.getSession()
-          set({ isAuthenticated: !!session?.user })
-        } catch (error) {
-          console.error("Auth check failed:", error)
-          set({ isAuthenticated: false })
-        }
-      },
-
-      addItem: async (item) => {
-        const { isAuthenticated } = get()
-        if (!isAuthenticated) {
-          throw new Error("Please login to add items to cart")
-        }
-
+      addItem: (item) => {
+        const quantity = item.quantity ?? 1
         set((state) => {
           const existingItem = state.items.find((i) => i.id === item.id)
           if (existingItem) {
             return {
               items: state.items.map((i) =>
                 i.id === item.id
-                  ? { ...i, quantity: i.quantity + 1 }
+                  ? { ...i, quantity: i.quantity + quantity }
                   : i
               ),
             }
           }
-          return { items: [...state.items, { ...item, quantity: 1 }] }
+          return {
+            items: [
+              ...state.items,
+              {
+                id: item.id,
+                title: item.title,
+                price: item.price,
+                image: item.image,
+                category: item.category,
+                seller: item.seller,
+                quantity,
+              },
+            ],
+          }
         })
       },
 
-      removeItem: async (id) => {
-        const { isAuthenticated } = get()
-        if (!isAuthenticated) {
-          throw new Error("Please login to modify cart")
-        }
-
+      removeItem: (id) => {
         set((state) => ({
           items: state.items.filter((item) => item.id !== id),
         }))
       },
 
-      updateQuantity: async (id, quantity) => {
-        const { isAuthenticated } = get()
-        if (!isAuthenticated) {
-          throw new Error("Please login to modify cart")
+      updateQuantity: (id, quantity) => {
+        if (quantity < 1) {
+          get().removeItem(id)
+          return
         }
-
         set((state) => ({
           items: state.items.map((item) =>
             item.id === id ? { ...item, quantity } : item
@@ -83,14 +72,7 @@ export const useCartStore = create<CartStore>()(
         }))
       },
 
-      clearCart: async () => {
-        const { isAuthenticated } = get()
-        if (!isAuthenticated) {
-          throw new Error("Please login to modify cart")
-        }
-
-        set({ items: [] })
-      },
+      clearCart: () => set({ items: [] }),
     }),
     {
       name: "cart-storage",

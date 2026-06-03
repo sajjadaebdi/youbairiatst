@@ -42,7 +42,10 @@ export default function LoginPage() {
 
       if (data.user) {
         toast.success("Login successful!")
-        router.push("/")
+        const callbackUrl =
+          new URLSearchParams(window.location.search).get("callbackUrl") ||
+          "/sell/promptstore"
+        router.push(callbackUrl)
       }
     } catch (error) {
       console.error("Login error:", error)
@@ -70,9 +73,9 @@ export default function LoginPage() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: typeof window !== "undefined" ? `${window.location.origin}/auth/callback` : `http://localhost:3000/auth/callback`,
+          redirectTo: `${window.location.origin}/auth/callback?next=/sell/promptstore`,
         },
-      })
+      });
 
       if (error) {
         throw new Error(error.message)

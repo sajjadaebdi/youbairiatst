@@ -39,11 +39,11 @@ export function Navbar() {
             </Link>
             <Link href="/products" className="flex items-center gap-1 text-sm font-medium hover:text-primary transition-colors">
               <Package className="h-3.5 w-3.5" />
-              Products
+              Products & Campaigns
             </Link>
             <Link href="/contact-us" className="flex items-center gap-1 text-sm font-medium hover:text-primary transition-colors">
               <MessageSquare className="h-3.5 w-3.5" />
-              Contact
+              Help
             </Link>
           </nav>
 

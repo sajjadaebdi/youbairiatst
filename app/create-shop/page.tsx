@@ -23,7 +23,7 @@ export default function CreateShopPage() {
             <span className="text-sm font-medium">Start selling in minutes</span>
           </div>
           <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary via-primary/80 to-primary/60 animate-fade-in-up leading-tight">
-            Launch Your Digital Shop
+            Make Campaigns To Market Your Products & Services.
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
             Join the fastest growing marketplace for digital products. 
@@ -35,9 +35,9 @@ export default function CreateShopPage() {
         <div className="max-w-2xl mx-auto mb-20">
           <Card className="border-0 shadow-lg bg-card/50 backdrop-blur-sm">
             <CardHeader>
-              <CardTitle className="text-2xl">Create Your Shop</CardTitle>
+              <CardTitle className="text-2xl">Create Campaign</CardTitle>
               <CardDescription>
-                Fill out the form below to start selling your digital products.
+                Add your campaign details to start marketing.
               </CardDescription>
             </CardHeader>
             <CardContent>

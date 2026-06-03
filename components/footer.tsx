@@ -13,18 +13,14 @@ export function Footer() {
               Your trusted digital marketplace for quality digital products, software, and creative assets.
             </p>
             <div className="flex space-x-4">
-              <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                <Facebook className="h-5 w-5" />
-              </Link>
-              <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
+              
+              <Link href="https://www.x.com/youbairia" className="text-muted-foreground hover:text-primary transition-colors">
                 <Twitter className="h-5 w-5" />
               </Link>
-              <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
+              <Link href="https://www.instagram.com/youbairia" className="text-muted-foreground hover:text-primary transition-colors">
                 <Instagram className="h-5 w-5" />
               </Link>
-              <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                <Linkedin className="h-5 w-5" />
-              </Link>
+              
             </div>
           </div>
 
@@ -115,15 +111,15 @@ export function Footer() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="flex items-center space-x-2">
               <Mail className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">info@youbairia.com</span>
+              <span className="text-sm text-muted-foreground">youbairia@outlook.com</span>
             </div>
             <div className="flex items-center space-x-2">
               <Phone className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">+919368598307</span>
+              <span className="text-sm text-muted-foreground">+917983009243</span>
             </div>
             <div className="flex items-center space-x-2">
               <MapPin className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">dehradun, india</span>
+              <span className="text-sm text-muted-foreground">Dehradun, india</span>
             </div>
           </div>
         </div>
