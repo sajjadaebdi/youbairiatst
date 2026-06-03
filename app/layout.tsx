@@ -6,6 +6,7 @@ import { Footer } from '@/components/footer'
 import { Toaster } from 'sonner'
 import { SessionProvider } from '@/components/session-provider'
 import { CartNotification } from './components/cart-notification'
+import { Analytics } from '@vercel/analytics/next'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -35,6 +36,7 @@ export default function RootLayout({
           <Toaster richColors position="top-center" />
           <CartNotification />
         </SessionProvider>
+        <Analytics />
       </body>
     </html>
   )
