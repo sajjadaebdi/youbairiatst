@@ -9,6 +9,7 @@ import { FeatureGrid } from "@/components/landing/feature-grid"
 import { ShowcaseSection } from "@/components/landing/showcase-section"
 import { VisionSection } from "@/components/landing/vision-section"
 import { FinalCtaSection } from "@/components/landing/final-cta"
+import { Analytics } from "@vercel/analytics/next"
 
 export default function LandingPage() {
   const router = useRouter()
